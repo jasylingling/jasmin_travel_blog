@@ -1,0 +1,11 @@
+# activate rewrite
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# remove the .php extension from a php file
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# remove the .html extension from a html file
+RewriteRule ^([^\.]+)$ $1.html [NC,L]
+
+
