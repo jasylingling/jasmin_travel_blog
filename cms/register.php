@@ -43,8 +43,13 @@ if(isset($_POST['submit'])) {
     $confirmPasswordValue = $confirm_password;
 
     // check if username field is empty
-    if(empty($registration_user)){
+    if(empty($registration_user)) {
         $validationErrorUsername = "<ul role=\"alert\"><li>Bitte gib den gewünschten Usernamen ein.</li></ul>";
+    // else check if username contains illegal characters
+    } else if (!preg_match('/^[-a-z0-9_]+$/i', $registration_user))  {
+        $validationErrorUsername= "<ul role=\"alert\"><li>Der Username darf keine Sonderzeichen beinhalten, nur Bindestrich (-) oder Unterstrich (_) sind erlaubt.</li></ul>";
+    } else if (strlen($registration_user) < 3) {
+        $validationErrorUsername= "<ul role=\"alert\"><li>Der Username muss mindestens 3 Zeichen lang sein.</li></ul>";
     } else {
         // check if username is already taken
         $queryLogin = "SELECT * FROM `users` WHERE `username`=?";
@@ -61,15 +66,34 @@ if(isset($_POST['submit'])) {
             $validationErrorUsername = "<ul role=\"alert\"><li>Sorry, dieser Username ist bereits vergeben!</li></ul>";
         }                 
     }
+
+    // check if email field is empty
+    if(empty($email)){
+        $validationErrorMail = "<ul role=\"alert\"><li>Bitte gib die gewünschte E-Mail-Adresse ein.</li></ul>";
+    // else check if email address is valid
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $validationErrorMail = "<ul role=\"alert\"><li>Bitte gib eine gültige E-Mail-Adresse ein.</li></ul>";
+    }
     
     // check if password field is empty
     if(empty($registration_password)){
         $validationErrorPW = "<ul role=\"alert\"><li>Bitte gib das gewünschte Passwort ein.</li></ul>";
-    } // else if (!$registration_password == $confirm_password) {
-    //     $validationErrorPWMatch = "Whoops, Passwort stimmt nicht überein.";
-    // }
+    // else check if password contains at least one letter, at least one number, and be longer than six characters - source regex: https://regexlib.com/REDetails.aspx?regexp_id=770
+    } else if (!preg_match('/^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,}$/', $registration_password)) {
+        $validationErrorPW = "<ul role=\"alert\"><li>Passwort muss mindestens 6 Zeichen lang sein und mindestens eine Zahl enthalten.</li></ul>";
+        $validationErrorPWMatch = "<ul role=\"alert\"><li>Passwort muss mindestens 6 Zeichen lang sein und mindestens eine Zahl enthalten.</li></ul>";
+    } 
 
+    // check if confirm password field is empty
+    if(empty($confirm_password)){
+        $validationErrorPWMatch = "<ul role=\"alert\"><li>Bitte gib das gleiche Passwort nochmals ein.</li></ul>";
+    // else check if password matches
+    } else if ($registration_password !== $confirm_password) {
+        $validationErrorPWMatch = "<ul role=\"alert\"><li>Whoops, die Passwörter stimmen nicht überein!</li></ul>";
+        $validationErrorPW = "<ul role=\"alert\"><li>Whoops, die Passwörter stimmen nicht überein!</li></ul>";
+    } 
 
+    // if no validation errors, insert new user data to database
     if(!$validationErrorUsername && !$validationErrorMail && !$validationErrorPW && !$validationErrorPWMatch) {
         $password_hash = password_hash($registration_password, PASSWORD_DEFAULT); // create a password hash    
 	
@@ -78,9 +102,18 @@ if(isset($_POST['submit'])) {
         $statement = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($statement, 'sss', $registration_user, $email, $password_hash); // 'sss' = 3 strings: username, email & password_hash
         mysqli_stmt_execute($statement);
+
         // if($statement) {
         //     echo "Registration successful!";
         // }
+
+        // send confirmation email to new user
+        $to = $email; // new user mail
+        $email_subject = "Registrierungsbestätigung für Jasmin's Travel Blog";
+        $email_body = "Welcome $registration_user! Du wurderst erfolgreich für das CMS von Jasmin's Travel Blog angemeldet. Inskünftig kannst du die Website mitgestalten.\n Klicke auf folgenden Link um dich einzuloggen: <a href=\"login\">Login CMS</a>\n Viel Spass! :)";
+        $headers = "From: jasmin.fischli@outlook.com\n"; // This is the email address the generated message will be from.
+        $headers .= 'Content-type: text/plain; charset=iso-8859-1'; // text/html
+        // mail($to,$email_subject,$email_body,$headers); // !!! only works with an active mailserver !!!
     }  
 } else {
     $registrationUserValue = "";
@@ -125,7 +158,7 @@ if(isset($_POST['submit'])) {
         <div class="row">
             <div class="col-lg-5 col-md-10 mx-auto">
             <h2 class="text-center">Registration</h2>
-                <form action="register" method="post">
+                <form action="register" method="post" novalidate>
                     <div class="control-group">
                         <div class="form-group floating-label-form-group controls">
                             <label for="username">Username</label>

@@ -22,12 +22,12 @@ if(isset($_POST['submit'])) {
     $passwordValue = $password;
 
     // check if username field is empty
-    if(empty($username)){
+    if(empty($username)) {
         $validationErrorUsername = "<ul role=\"alert\"><li>Bitte gib deinen Usernamen ein.</li></ul>";
     }
     
     // check if password field is empty
-    if(empty($password)){
+    if(empty($password)) {
         $validationErrorPW = "<ul role=\"alert\"><li>Bitte gib dein Passwort ein.</li></ul>";
     }
 

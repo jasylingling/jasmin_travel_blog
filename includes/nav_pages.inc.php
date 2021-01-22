@@ -29,7 +29,7 @@
                 if(sessionIsValid()) {
                     echo "<li class=\"nav-item\"><a class=\"nav-link rounded btn btn-primary mr-2 ml-2\" href=\"../cms/dashboard\"><i class=\"fas fa-cog\" style=\"font-size: medium;\"></i> Dashboard</a></li>";
                     echo "<style>#loginIcon{display: none !important;}</style>";
-                    echo "<li class=\"nav-item\"><a class=\"nav-link border border-white rounded\" href=\"../includes/logout\"><i class=\"fas fa-sign-out-alt\" style=\"font-size: medium;\"></i> Logout</a></li>";                   
+                    echo "<li class=\"nav-item\"><a class=\"nav-link border border-white rounded\" href=\"../includes/logout\" id=\"logoutIcon\"><i class=\"fas fa-sign-out-alt\" style=\"font-size: medium;\"></i> Logout</a></li>";                   
                 }
                 ?>
             </ul>

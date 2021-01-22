@@ -398,3 +398,8 @@ footer .copyright {
   font-size: 16px;
   padding: 25px 35px;
 }
+
+#logoutIcon:hover {
+  background: white;
+  color: #00657B!important;
+}
