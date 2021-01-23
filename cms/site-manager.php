@@ -19,6 +19,44 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // echo '<pre>';
 // print_r($_SESSION);
 // echo '</pre>';
+
+// ***************** AB HIER BEISPIEL RENÉ - ANPASSEEEN !! // BEITRÄGE LESEN UND LÖSCHEN (** READ UND DELETE VON C *R* U *D* ***) ******************* 
+
+// Löschen eines Datensatzes
+if(isset($_POST['go'])){
+    $cleanId = filter_var($_POST['go'], FILTER_SANITIZE_STRING);
+    $sqldelete = "DELETE FROM contents WHERE id=".$cleanId;
+    $resultdelete = mysqli_query($con,$sqldelete);
+}
+
+
+// Alle Beiträge aufrufen
+$sql = "SELECT id,title FROM contents";
+// $result = $con->query($sql);
+$result = mysqli_query($con,$sql);
+// if($result->num_rows > 0){ => objektorientiert
+if(mysqli_num_rows($result) > 0){
+    $code = "<form action=\"index.php\" method=\"post\">";
+    $code .= "<ul>";
+    // while($row = $result->fetch_assoc()) { => objektorientiert
+    while($row = mysqli_fetch_assoc($result)) {
+        $code .= "<li>";
+        // Link zum Updaten eines Beitrages
+        $code .= "<a href=\"update.php?id=".$row["id"]."\" >".$row["title"]."</a>";
+        // Button zum Löschen
+        $code .= " <button type=\"submit\" name=\"go\">Löschen</button>";
+        $code .= "</li>";
+    }
+    $code .= "</ul>";
+    $code .= "</form>";
+}
+
+else {
+    $code .= "No results";
+}
+// ***************** ENDE BEISPIEL RENÉ - ANPASSEEEN !! // BEITRÄGE LESEN UND LÖSCHEN (** READ UND DELETE VON C *R* U *D* ***) ******************* 
+
+
 ?>
 
 <!DOCTYPE html>
@@ -55,7 +93,22 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-                bleeeeeeeeeeeeeeeeeeeeeeeeeeeh
+
+                <!-- ********** READ UND DELETE VON C *R* U *D* // ANPASSEEEEEEEEEEN ************ -->
+                <h2>Übersicht Beiträge Home</h2>
+                <?php
+                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
+                ?>
+
+                <h2>Übersicht Beiträge Blogartikel</h2>
+                <?php
+                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
+                ?>
+
+                <h2>Übersicht Galerie Blog</h2>
+                <?php
+                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
+                ?>
             </div>
         </div>
     </div>
