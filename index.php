@@ -101,6 +101,38 @@ require_once('includes/functions.inc.php');
   </header>
 
   <!-- Main Content -->
+
+  <!-- VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="post-preview">
+          <a href="pages/blog# ***C O U N T R Y***">
+            <h2 class="post-title">
+              ***TITLE***
+            </h2>
+            <h3 class="post-subtitle">
+              ***SUBTITLE***
+            </h3>
+          </a>
+          <p class="post-meta">Gepostet am ***POST_DATE***</p>
+          <a href="pages/blog# ***C O U N T R Y***">
+            <img class="img-fluid" src="img/ ***I M G _ F I L E N A M E***"
+              alt="***IMG_DESCRIPTION***">
+          </a>
+        </div>     
+        <hr>
+        <!-- Pager -->
+        <div class="clearfix">
+          <a class="btn btn-primary float-right" href="pages/blog#olderposts">Older Posts &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ENDE // VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
+
+
+  <!-- AKTUELLE HTML-STRUKTUR OHNE PHP/DATEN AUS SQL DATENBANK -->
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">

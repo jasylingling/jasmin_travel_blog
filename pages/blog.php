@@ -36,6 +36,43 @@ require_once('../includes/functions.inc.php');
   </header>
 
   <!-- Post Content -->
+
+  <!-- VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <!-- ***COUNTRY*** aus home möglich im Kommentarfeld?*** Anonsten nur "Country Article" anstatt z.B. Japan Article -->
+          <h2 id="***C O U N T R Y aus home***">***TITLE aus home***</h2>
+          <span class="meta"><em>Gepostet am ***POST_DATE aus home***</em></span>
+          <p>***CONTENT***</p>
+          <p>***CONTENT***</p>
+          <p>***CONTENT***</p>
+
+          <!-- Gallery ***COUNTRY*** aus home möglich im Kommentarfeld?*** Anonsten nur "Gallery Country" anstatt z.B. Gallery Japan -->
+          <section id="gallery-***C O U N T R Y aus home***" class="d-flex justify-content-center flex-wrap">
+            <a href="../img/***I M G _ F I L E N A M E***" data-lightbox="***C O U N T R Y aus home***"
+              data-title="***IMG_CAPTION***"><img src="../img/***I M G _ F I L E N A M E***"
+                alt="***IMG_DESCRIPTION***" height="200"
+                class="border border-white"></a>
+          </section>
+          
+          <br>
+          <hr>
+          <br>
+
+          <div id="olderposts"></div>
+        </div>
+      </div>
+    </div>
+  </article>
+  <br>
+  <hr>
+
+  <!-- ENDE // VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
+
+
+
   <article>
     <div class="container">
       <div class="row">

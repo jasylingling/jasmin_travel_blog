@@ -20,43 +20,40 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // print_r($_SESSION);
 // echo '</pre>';
 
-// ***************** AB HIER BEISPIEL RENÉ - ANPASSEEEN !! // BEITRÄGE LESEN UND LÖSCHEN (** READ UND DELETE VON C *R* U *D* ***) ******************* 
 
-// Löschen eines Datensatzes
-if(isset($_POST['go'])){
-    $cleanId = filter_var($_POST['go'], FILTER_SANITIZE_STRING);
-    $sqldelete = "DELETE FROM contents WHERE id=".$cleanId;
-    $resultdelete = mysqli_query($con,$sqldelete);
-}
-
-
-// Alle Beiträge aufrufen
-$sql = "SELECT id,title FROM contents";
-// $result = $con->query($sql);
-$result = mysqli_query($con,$sql);
-// if($result->num_rows > 0){ => objektorientiert
+// get all contents from database
+$query = "SELECT * FROM contents";
+$result = mysqli_query($conn, $query);
 if(mysqli_num_rows($result) > 0){
-    $code = "<form action=\"index.php\" method=\"post\">";
-    $code .= "<ul>";
-    // while($row = $result->fetch_assoc()) { => objektorientiert
-    while($row = mysqli_fetch_assoc($result)) {
-        $code .= "<li>";
-        // Link zum Updaten eines Beitrages
-        $code .= "<a href=\"update.php?id=".$row["id"]."\" >".$row["title"]."</a>";
-        // Button zum Löschen
-        $code .= " <button type=\"submit\" name=\"go\">Löschen</button>";
-        $code .= "</li>";
+    while($row = mysqli_fetch_assoc($result)) { 
+        $blogPosts [] = [
+            'id' => $row['id'],
+            'title' => $row['title'],
+            'date' => $row['post_date']
+        ];
     }
-    $code .= "</ul>";
-    $code .= "</form>";
+    // echo '<pre>';
+    // print_r($blogPosts);
+    // echo '</pre>';
+    
+} else {
+    die("No results.");
 }
 
-else {
-    $code .= "No results";
-}
-// ***************** ENDE BEISPIEL RENÉ - ANPASSEEEN !! // BEITRÄGE LESEN UND LÖSCHEN (** READ UND DELETE VON C *R* U *D* ***) ******************* 
-
-
+// delete blogposts
+if(isset($_POST['delete'])) {
+    $cleanId = desinfect($_POST['delete']);
+    $sqldelete = "DELETE FROM `contents` WHERE `id`=?";        
+    $stmt = mysqli_prepare($conn, $sqldelete);
+    mysqli_stmt_bind_param($stmt, 'i', $cleanId); // 'i' = 1 integer: id
+    
+    if (mysqli_stmt_execute($stmt)){
+        header("Location: site-manager");
+        die();
+    } else {
+        echo "error deleting the blog article";
+    }
+} 
 ?>
 
 <!DOCTYPE html>
@@ -92,23 +89,66 @@ else {
     <!-- Main Content -->
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="col-lg-12 col-md-10 mx-auto">
+                <h2 class="text-center">Übersicht Blogartikel</h2>
+                <br>
+                <a href="create" class="btn btn-primary"><i class="fas fa-plus"></i> Neuer Artikel</a>
+                <br>
+                <br>
+                <div class="table-responsive">                          
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Titel</th>
+                            <th scope="col">gepostet am</th>
+                            <th></th>
+                            <th></th>
+                            </tr>
+                        </thead>
+                        <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
+                        <tbody>
+                            <tr>
+                            <th scope="row"><?=$key+1?></th>
+                            <td><a href="edit?id=<?=$value['id']?>"><?=$value['title']?></a></td>
+                            <td><?=$value['date']?></td>
+                            <td><a class="btn btn-primary" href="edit?id=<?=$value['id']?>"><i class="fas fa-edit"></i> Bearbeiten</a></td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deletePost-<?=$value['id']?>"><i class="fas fa-trash-alt mr-1"></i> Löschen</button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deletePost-<?=$value['id']?>" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="deleteModal">Artikel <u><?=$value['title']?></u> löschen?</h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Möchtest du diesen Artikel wirklich löschen?
+                                        </div>
+                                        <form action="site-manager" method="post" class="modal-footer">
+                                            <button type="delete" class="btn btn-danger" name="delete" value="<?=$value['id']?>">Löschen</button>
+                                            <button type="button" class="btn btn-light border-dark" data-dismiss="modal">Abbrechen</button>
+                                        </form>
+                                        </div>
+                                    </div>
+                                </div>                            
+                            </td>
+                            </tr>
+                        </tbody>
+                        <?php } ?>
+                    </table>
 
-                <!-- ********** READ UND DELETE VON C *R* U *D* // ANPASSEEEEEEEEEEN ************ -->
-                <h2>Übersicht Beiträge Home</h2>
-                <?php
-                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
-                ?>
+                    <h2 class="text-center">Übersicht About</h2>
+                    <p class="text-center">would be greaaaaaaaat</p>
 
-                <h2>Übersicht Beiträge Blogartikel</h2>
-                <?php
-                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
-                ?>
+                    <h2 class="text-center">Übersicht Contact</h2>
+                    <p class="text-center">would be greaaaaaaaat</p>
 
-                <h2>Übersicht Galerie Blog</h2>
-                <?php
-                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
-                ?>
+                </div>
             </div>
         </div>
     </div>
