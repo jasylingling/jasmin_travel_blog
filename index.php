@@ -2,7 +2,29 @@
 session_start();
 require_once('includes/config.inc.php');
 require_once('includes/functions.inc.php');
+
+// get all contents from database
+$query = "SELECT * FROM `contents`";
+$result = mysqli_query($conn, $query);
+if(mysqli_num_rows($result) > 0){
+    while($row = mysqli_fetch_assoc($result)) { 
+      $blogPosts [] = [
+          'country' => $row['country'],
+          'title' => $row['title'],
+          'subtitle' => $row['subtitle'],
+          'date' => $row['post_date'],
+          'author' => $row['author']
+      ];
+    }
+    // echo '<pre>';
+    // print_r($blogPosts);
+    // echo '</pre>';
+    
+} else {
+    die("No results.");
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -106,22 +128,24 @@ require_once('includes/functions.inc.php');
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
+        <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
         <div class="post-preview">
-          <a href="pages/blog# ***C O U N T R Y***">
+          <a href="pages/blog#<?=$value['country']?>">
             <h2 class="post-title">
-              ***TITLE***
+              <?=$value['title']?>
             </h2>
             <h3 class="post-subtitle">
-              ***SUBTITLE***
+              <?=$value['subtitle']?>
             </h3>
           </a>
-          <p class="post-meta">Gepostet von ***AUTHOR*** am ***POST_DATE***</p>
-          <a href="pages/blog# ***C O U N T R Y***">
+          <p class="post-meta">Gepostet von <?=$value['author']?> am <?=date("d.m.Y", strtotime($value['date']))?></p>
+          <a href="pages/blog#<?=$value['country']?>">
             <img class="img-fluid" src="img/ ***I M G _ F I L E N A M E***"
               alt="***IMG_DESCRIPTION***">
           </a>
         </div>     
         <hr>
+        <?php } ?> 
         <!-- Pager -->
         <div class="clearfix">
           <a class="btn btn-primary float-right" href="pages/blog#olderposts">Older Posts &rarr;</a>

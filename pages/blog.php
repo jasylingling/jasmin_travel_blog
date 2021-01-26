@@ -2,6 +2,28 @@
 session_start();
 require_once('../includes/config.inc.php');
 require_once('../includes/functions.inc.php');
+
+// get all contents from database
+$query = "SELECT * FROM `contents`";
+$result = mysqli_query($conn, $query);
+if(mysqli_num_rows($result) > 0){
+    while($row = mysqli_fetch_assoc($result)) { 
+      $blogPosts [] = [
+          'country' => $row['country'],
+          'title' => $row['title'],
+          'subtitle' => $row['subtitle'],
+          'content' => $row['content_blogarticle'],
+          'date' => $row['post_date'],
+          'author' => $row['author']
+      ];
+    }
+    // echo '<pre>';
+    // print_r($blogPosts);
+    // echo '</pre>';
+    
+} else {
+    die("No results.");
+}
 ?>
 
 <!DOCTYPE html>
@@ -42,25 +64,23 @@ require_once('../includes/functions.inc.php');
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <!-- ***COUNTRY*** aus home möglich im Kommentarfeld?*** Anonsten nur "Country Article" anstatt z.B. Japan Article -->
-          <h2 id="***C O U N T R Y aus home***">***TITLE aus home***</h2>
-          <span class="meta"><em>Gepostet von ***AUTHOR*** am ***POST_DATE aus home***</em></span>
-          <p>***CONTENT***</p>
-          <p>***CONTENT***</p>
-          <p>***CONTENT***</p>
+          <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
+          <!-- Country Article -->
+          <h2 id="<?=$value['country']?>"><?=$value['title']?></h2>
+          <span class="meta"><em>Gepostet von <?=$value['author']?> am <?=date("d.m.Y", strtotime($value['date']))?></em></span>
+          <p><?=$value['content']?></p>
 
-          <!-- Gallery ***COUNTRY*** aus home möglich im Kommentarfeld?*** Anonsten nur "Gallery Country" anstatt z.B. Gallery Japan -->
-          <section id="gallery-***C O U N T R Y aus home***" class="d-flex justify-content-center flex-wrap">
-            <a href="../img/***I M G _ F I L E N A M E***" data-lightbox="***C O U N T R Y aus home***"
+          <!-- Gallery Country -->
+          <section id="gallery-<?=$value['country']?>" class="d-flex justify-content-center flex-wrap">
+            <a href="../img/***I M G _ F I L E N A M E***" data-lightbox="<?=$value['country']?>"
               data-title="***IMG_CAPTION***"><img src="../img/***I M G _ F I L E N A M E***"
                 alt="***IMG_DESCRIPTION***" height="200"
                 class="border border-white"></a>
           </section>
-          
           <br>
           <hr>
-          <br>
-
+          <br>          
+          <?php } ?> 
           <div id="olderposts"></div>
         </div>
       </div>
