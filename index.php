@@ -115,7 +115,7 @@ require_once('includes/functions.inc.php');
               ***SUBTITLE***
             </h3>
           </a>
-          <p class="post-meta">Gepostet am ***POST_DATE***</p>
+          <p class="post-meta">Gepostet von ***AUTHOR*** am ***POST_DATE***</p>
           <a href="pages/blog# ***C O U N T R Y***">
             <img class="img-fluid" src="img/ ***I M G _ F I L E N A M E***"
               alt="***IMG_DESCRIPTION***">

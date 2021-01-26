@@ -1,127 +1,4 @@
 <?php
-require_once('../includes/config.inc.php');
-require_once('../includes/functions.inc.php');
-
-
-// ***************** AB HIER BEISPIEL RENÉ - ANPASSEEEN !! // BEITRÄGE BEARBEITEN (***UPDATE VON CR*U*D ***) ******************* 
-
-//Überprüfe die GET Variable für den ersten Aufruf --> Sanitize ---> immer WICHTIG bei GET-Variablen!!
-if ( isset($_GET["id"])){
-    $cleanId = filter_var($_GET["id"], FILTER_SANITIZE_STRING);
-}
-elseif (isset($_POST['hiddenID'])) {
-    // Beim zweiten Durchgang (Speichern) arbeite ich mit der POST-Variable, weil wir eine Versteckte Id auf der Seite platziert haben.
-    $cleanId = filter_var($_POST['hiddenID'], FILTER_SANITIZE_STRING);
-} 
-// else {
-//     //Script abbrechen wenn die GET oder POST-Variable nicht bekannt ist
-//     die("Weiss nicht welche Seite ich bearbeiten soll // Die Seite kann nicht aufgerufen werden. Damn Hacker"); //wenn ein Hacker probiert die URL zu manipulieren und anders aufzurufen
-// }  
-
-//Hole die Daten zum Beabeiten aus der DB
-// $query1 = "SELECT * FROM contents WHERE id=".$cleanId; //Query bauen
-// $result1 = mysqli_query($conn,$query1);  
-
-// if (mysqli_num_rows($result1) > 0){
-//     // $code = "<ul>";
-//     while($row = $result1->fetch_assoc()) {
-//     	$idDB = $row["id"];
-//         $titleDB = $row["title"];
-//        	$subtitleDB = $row["subtitle"];
-//         $contentDB = $row["content_blogarticle"];
-        
-//     }
-   
-// }else {
-//     // $code .= "No results";
-//     die("Kann den Beitrag nicht finden.");
-// }
-
-
-
-// //ist die Getvarable vorhanden testen
-// echo $_GET["id"];
-
-// require("credentials.php");
-// Insert record
-if(isset($_POST['go'])){
-    $idForUpdate = $_POST['hiddenID'];
-  $title = $_POST['title'];
-  $short_desc = $_POST['short_desc'];
-  $long_desc = $_POST['long_desc'];
-
-  if($title != ''){
-    // Hier muss update sein um das upzudeaten ***************************************************
-    // 
-    //---------------------------------------------------------
-    $query2 = "UPDATE contents SET title='".$title."', short_desc='".$short_desc."', long_desc='".$long_desc."' WHERE id=$idForUpdate";
-    // echo $query2;
-    mysqli_query($con, $query2);
-        die("Ich habe die Angaben gesichert");
-    // mysqli_query($con, "UPDATE contents SET title = $title, short_desc = $short_desc, long_desc = $long_desc");
-    // mysqli_query($con, "INSERT INTO contents(title,short_desc,long_desc) VALUES('".$title."','".$short_desc."','".$long_desc."') ");
-    // header('location: index.php');
-  }
-}
-
-
-?>
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Schreiben php</title>
-        <!-- Make sure the path to CKEditor is correct. -->
-        <script src="../ckeditor/ckeditor.js"></script>
-    </head>
-    <style type="text/css">
-    .cke_textarea_inline{
-       border: 1px solid black;
-    }
-    </style>
-    <body>
-    <br><br>
-<form method='post' action='edit.php'>
-       Titel:
-       <br>
-       <input type="text" name="title" value="<?=$titleDB?>">
-		<br>
-       Untertitel:
-       <textarea id='short_desc' name='short_desc' style='border: 1px solid black;'><?=$subtitleDB?></textarea><br>
-
-       Textinhalt:
-       <textarea id='long_desc' name='long_desc' ><?=$contentDB?></textarea><br>
-
-       <input type="hidden" name="hiddenID" value="<?=$idDB?>">
-
-       <input type="submit" name="go" value="Speichern"> 
-       <input type="submit" name="submit" value="Abbrechen">
-       
-    </form>
-
-<script type="text/javascript">
-// Initialize CKEditor
-CKEDITOR.inline( 'short_desc' );
-
-CKEDITOR.replace('long_desc',{
-	customConfig: 'MyConfig.js',
-  	width: "500px",
-  	height: "200px"
-
-}); 
-
-</script>
-    </body>
-</html>
-
-<!-- ***************** ENDE BEISPIEL RENÉ // BEITRÄGE BEARBEITEN (***UPDATE VON CR*U*D ***) *******************  -->
-
-
-
-<!-- ************ OFFIZIELLE SITE MANAGER VERSION, TO DO: ANPASSEN AUF EDIT-PART ********* -->
-
-
-<?php
 session_start();
 
 require_once('../includes/config.inc.php');
@@ -143,6 +20,98 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // print_r($_SESSION);
 // echo '</pre>';
 
+$articleID = $_GET['id'];
+// get selected blog article from database
+$query = "SELECT `country`, `title`, `subtitle`, `content_blogarticle` FROM `contents` WHERE `id`=?";
+$statement = mysqli_prepare($conn, $query);
+mysqli_stmt_bind_param($statement, 'i', $articleID);
+mysqli_stmt_execute($statement);
+$result = mysqli_stmt_get_result($statement);
+// check if there is a match
+if(mysqli_num_rows($result) == 1){ 
+    while($row = mysqli_fetch_assoc($result)) { 
+        $blogPosts [] = [
+            'country' => $row['country'],
+            'title' => $row['title'],
+            'subtitle' => $row['subtitle'],
+            'content' => $row['content_blogarticle']
+        ];
+    }
+    // echo '<pre>';
+    // print_r($blogPosts);
+    // echo '</pre>';
+    
+} else {
+    die("Beitrag kann nicht gefunden werden.");
+}
+
+
+$validationErrorCountry = "";
+$validationErrorTitle = "";
+$validationErrorSubtitle = "";
+$validationErrorContent = "";
+
+// check if save-button is clicked
+if(isset($_POST['save'])) {
+    $country = desinfect($_POST['country']); 
+    $title = desinfect($_POST['title']);
+    $subtitle = desinfect($_POST['subtitle']);
+    $content = desinfect($_POST['content']);
+
+    $countryValue = $country;
+    $titleValue = $title;
+    $subtitleValue = $subtitle;
+    $contentValue = $content;
+    // print_r($countryValue.$titleValue.$subtitleValue.$contentValue.$articleID);
+
+    // check if country field is empty
+    if(empty($country)) {
+        $validationErrorCountry = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    } else if (strlen($country) > 250) {
+        $validationErrorCountry = "<ul role=\"alert\"><li>Dieses Feld darf nicht mehr als 250 Zeichen enthalten.</li></ul>";
+    }
+    
+    // check if title field is empty
+    if(empty($title)) {
+        $validationErrorTitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    } else if (strlen($title) > 250) {
+        $validationErrorTitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht mehr als 250 Zeichen enthalten.</li></ul>";
+    }
+
+    // check if subtitle field is empty
+    if(empty($subtitle)) {
+        $validationErrorSubtitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    } else if (strlen($subtitle) > 250) {
+        $validationErrorSubtitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht mehr als 250 Zeichen enthalten.</li></ul>";
+    }
+
+    // check if content field is empty
+    if(empty($content)) {
+        $validationErrorContent = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    }
+
+    // if no validation errors, update article in database
+    if(!$validationErrorCountry && !$validationErrorTitle && !$validationErrorSubtitle && !$validationErrorContent) {
+
+        $queryUpdate = "UPDATE contents SET country=?, title=?, subtitle=?, content_blogarticle=? WHERE id=?";
+        
+        $stmt = mysqli_prepare($conn, $queryUpdate);
+        mysqli_stmt_bind_param($stmt, 'ssssi', $country, $title, $subtitle, $content, $articleID); // 'ssssi' = 4 strings and 1 integer: country, title, subtitle, content, id
+        if(!mysqli_stmt_execute($stmt)) {
+            echo mysqli_stmt_error($stmt);
+        } else {
+            header("Location: site-manager?updated");
+            die();
+        }
+    }
+    
+} else {
+    $countryValue = "";
+    $titleValue = "";
+    $subtitleValue = "";
+    $contentValue = "";
+
+}
 ?>
 
 <!DOCTYPE html>
@@ -151,7 +120,7 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 <head>
 
     <?php include("../includes/head.inc.html")?>
-    <title>CMS&nbsp;&ndash; Site Manager | Jasmin's Travel Blog</title>
+    <title>CMS&nbsp;&ndash; Site Manager&nbsp;&ndash; Artikel bearbeiten | Jasmin's Travel Blog</title>
 
 </head>
 
@@ -179,11 +148,65 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-                <h2>Übersicht Blogartikel</h2>
-                <?php
-                echo "Hier stehen Auflistung Inhalte und Button \"Beabeiten\" und \"Löschen\"";
-                echo "$code";
-                ?>                
+                <h2 class="text-center">Artikel bearbeiten</h2>
+                <?php foreach ($blogPosts as $key => $value) { ?>
+                <form action="edit?id=<?=$articleID?>" method="post">
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="country">Land</label>
+                            <input type="text" class="form-control bg-light border" name="country" id="country"
+                                placeholder="Land" value="<?=$countryValue ? $countryValue : $value['country']?>">
+                            <div class="help-block text-danger"><?=$validationErrorCountry?></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="title">Titel</label>
+                            <input type="text" class="form-control bg-light border" name="title" id="title"
+                                placeholder="Titel" value="<?=$titleValue ? $titleValue : $value['title']?>">
+                            <div class="help-block text-danger"><?=$validationErrorTitle?></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="subtitle">Untertitel</label>
+                            <input type="subtitle" class="form-control bg-light border" name="subtitle" id="subtitle"
+                                placeholder="Untertitel" value="<?=$subtitleValue ? $subtitleValue : $value['subtitle']?>">
+                            <div class="help-block text-danger"><?=$validationErrorSubtitle?></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="content">Textinhalt</label>
+                            <textarea class="form-control bg-light border" name="content" id="content" rows="10" cols="80" placeholder="Textinhalt"><?=$contentValue ? $contentValue : $value['content']?></textarea>
+                            <div class="help-block text-danger"><?=$validationErrorContent?></div>
+                        </div>
+                    </div>
+                    <button type="save" class="btn btn-primary mr-1" name="save">Speichern</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-light border-dark" data-toggle="modal" data-target=".cancel-lg">Abbrechen</button>
+                    <!-- Modal -->
+                    <div class="modal fade cancel-lg" id="cancel" tabindex="-1" role="dialog" aria-labelledby="cancel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="cancel">Vorgang abbrechen</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Möchtest du wirklich abbrechen? Allfällige Änderungen werden nicht übernommen!
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="site-manager" class="btn btn-danger">Ja, zurück zur Übersicht</a>
+                                    <button type="button" class="btn btn-light border-dark" data-dismiss="modal">Nein, nicht abbrechen</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>               
+                </form>
+                <?php } ?>          
             </div>
         </div>
     </div>
@@ -207,5 +230,3 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 </body>
 
 </html>
-
-<!-- ************ OFFIZIELLE SITE MANAGER VERSION, TO DO: ANPASSEN AUF EDIT-PART ********* -->

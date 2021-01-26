@@ -44,7 +44,7 @@ require_once('../includes/functions.inc.php');
         <div class="col-lg-8 col-md-10 mx-auto">
           <!-- ***COUNTRY*** aus home möglich im Kommentarfeld?*** Anonsten nur "Country Article" anstatt z.B. Japan Article -->
           <h2 id="***C O U N T R Y aus home***">***TITLE aus home***</h2>
-          <span class="meta"><em>Gepostet am ***POST_DATE aus home***</em></span>
+          <span class="meta"><em>Gepostet von ***AUTHOR*** am ***POST_DATE aus home***</em></span>
           <p>***CONTENT***</p>
           <p>***CONTENT***</p>
           <p>***CONTENT***</p>

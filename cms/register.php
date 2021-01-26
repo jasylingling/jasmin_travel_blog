@@ -48,8 +48,8 @@ if(isset($_POST['submit'])) {
     // else check if username contains illegal characters
     } else if (!preg_match('/^[-a-z0-9_]+$/i', $registration_user))  {
         $validationErrorUsername= "<ul role=\"alert\"><li>Der Username darf keine Sonderzeichen beinhalten, nur Bindestrich (-) oder Unterstrich (_) sind erlaubt.</li></ul>";
-    } else if (strlen($registration_user) < 3) {
-        $validationErrorUsername= "<ul role=\"alert\"><li>Der Username muss mindestens 3 Zeichen lang sein.</li></ul>";
+    } else if (strlen($registration_user) < 3 || strlen($registration_user) > 30) {
+        $validationErrorUsername= "<ul role=\"alert\"><li>Der Username muss mindestens 3 und darf höchstens 30 Zeichen lang sein.</li></ul>";
     } else {
         // check if username is already taken
         $queryLogin = "SELECT * FROM `users` WHERE `username`=?";
@@ -79,7 +79,7 @@ if(isset($_POST['submit'])) {
     if(empty($registration_password)){
         $validationErrorPW = "<ul role=\"alert\"><li>Bitte gib das gewünschte Passwort ein.</li></ul>";
     // else check if password contains at least one letter, at least one number, and be longer than six characters - source regex: https://regexlib.com/REDetails.aspx?regexp_id=770
-    } else if (!preg_match('/^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,}$/', $registration_password)) {
+    } else if (!preg_match('/^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,50}$/', $registration_password)) {
         $validationErrorPW = "<ul role=\"alert\"><li>Passwort muss mindestens 6 Zeichen lang sein und mindestens eine Zahl enthalten.</li></ul>";
         $validationErrorPWMatch = "<ul role=\"alert\"><li>Passwort muss mindestens 6 Zeichen lang sein und mindestens eine Zahl enthalten.</li></ul>";
     } 
@@ -157,7 +157,12 @@ if(isset($_POST['submit'])) {
     <div class="container">
         <div class="row">
             <div class="col-lg-5 col-md-10 mx-auto">
-            <h2 class="text-center">Registration</h2>
+                <h2 class="text-center">Registration</h2>
+                <?php 
+                if($statement) { 
+                    echo "<p class=\"alert alert-success\"><strong><u>Registrierung erfolgreich, yay!</u><br>In Kürze wird der neue Benutzer ein Mail mit den Zugangsdaten erhalten.</strong></p>";
+                } 
+                ?>
                 <form action="register" method="post" novalidate>
                     <div class="control-group">
                         <div class="form-group floating-label-form-group controls">
@@ -193,11 +198,6 @@ if(isset($_POST['submit'])) {
                     </div>
                     <button type="submit" class="btn btn-primary" name="submit">Registrieren</button>
                 </form>
-                <?php 
-                if($statement) { 
-                    echo "<p class=\"alert alert-success\"><strong><u>Registrierung erfolgreich, yay!</u><br>In Kürze wird der neue Benutzer ein Mail mit den Zugangsdaten erhalten.</strong></p>";
-                } 
-                ?>
             </div>
         </div>
     </div>

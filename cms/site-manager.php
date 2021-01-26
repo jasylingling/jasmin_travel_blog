@@ -22,7 +22,7 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 
 
 // get all contents from database
-$query = "SELECT * FROM contents";
+$query = "SELECT * FROM `contents`";
 $result = mysqli_query($conn, $query);
 if(mysqli_num_rows($result) > 0){
     while($row = mysqli_fetch_assoc($result)) { 
@@ -40,7 +40,9 @@ if(mysqli_num_rows($result) > 0){
     die("No results.");
 }
 
-// delete blogposts
+
+
+// if the "ultimate" delete-button in the modal is clicked, DELETE selected blog post
 if(isset($_POST['delete'])) {
     $cleanId = desinfect($_POST['delete']);
     $sqldelete = "DELETE FROM `contents` WHERE `id`=?";        
@@ -48,7 +50,7 @@ if(isset($_POST['delete'])) {
     mysqli_stmt_bind_param($stmt, 'i', $cleanId); // 'i' = 1 integer: id
     
     if (mysqli_stmt_execute($stmt)){
-        header("Location: site-manager");
+        header("Location: site-manager?deleted");
         die();
     } else {
         echo "error deleting the blog article";
@@ -95,23 +97,27 @@ if(isset($_POST['delete'])) {
                 <a href="create" class="btn btn-primary"><i class="fas fa-plus"></i> Neuer Artikel</a>
                 <br>
                 <br>
-                <div class="table-responsive">                          
+                <div class="table-responsive">
+                    <?= isset($_GET['updated']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich aktualisiert!</strong></div>" : ""?>                          
+                    <?= isset($_GET['created']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich erstellt!</strong></div>" : ""?>                          
+                    <?= isset($_GET['deleted']) ? "<div class=\"alert alert-danger\" role=\"alert\"><strong>Der Artikel wurde gelöscht!</strong></div>" : ""?>                          
                     <table class="table table-hover">
                         <thead class="thead-light">
                             <tr>
                             <th scope="col">#</th>
                             <th scope="col">Titel</th>
-                            <th scope="col">gepostet am</th>
-                            <th></th>
-                            <th></th>
+                            <th scope="col" colspan="3">gepostet am</th>
                             </tr>
                         </thead>
-                        <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
                         <tbody>
+                        <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
                             <tr>
                             <th scope="row"><?=$key+1?></th>
-                            <td><a href="edit?id=<?=$value['id']?>"><?=$value['title']?></a></td>
-                            <td><?=$value['date']?></td>
+                            <td>
+                                <a href="edit?id=<?=$value['id']?>"><?=isset($_GET['created']) && $key == 0 ? $value['title']." <span class=\"badge bg-warning float-right p-2\">NEW!</span>" : $value['title']?></a>
+                            </td>
+                            <!-- change sql date format from YYYY-MM-DD to DD.MM.YYYY-->
+                            <td class="pr-3"><?=date("d.m.Y", strtotime($value['date']))?></td>
                             <td><a class="btn btn-primary" href="edit?id=<?=$value['id']?>"><i class="fas fa-edit"></i> Bearbeiten</a></td>
                             <td>
                                 <!-- Button trigger modal -->
@@ -120,12 +126,12 @@ if(isset($_POST['delete'])) {
                                 <div class="modal fade" id="deletePost-<?=$value['id']?>" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                         <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title" id="deleteModal">Artikel <u><?=$value['title']?></u> löschen?</h4>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="deleteModal">Artikel <u><?=$value['title']?></u> löschen</h4>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
                                         <div class="modal-body">
                                             Möchtest du diesen Artikel wirklich löschen?
                                         </div>
@@ -137,9 +143,9 @@ if(isset($_POST['delete'])) {
                                     </div>
                                 </div>                            
                             </td>
-                            </tr>
-                        </tbody>
+                            </tr>                        
                         <?php } ?>
+                        </tbody>
                     </table>
 
                     <h2 class="text-center">Übersicht About</h2>

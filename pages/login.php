@@ -118,8 +118,12 @@ if(!$sessionValid) {
     <div class="container">
         <div class="row">
             <div class="col-lg-5 col-md-10 mx-auto">
-                <!-- LOGIN Form -->
                 <h2 class="text-center">Login</h2>
+                <?php 
+                if($loginError) {
+                    echo "<p class=\"alert alert-danger\"><strong>Username oder Passwort falsch</strong></p>";
+                } 
+                ?>
                 <form action="login" method="post">
                     <div class="control-group">
                         <div class="form-group floating-label-form-group controls">
@@ -138,12 +142,7 @@ if(!$sessionValid) {
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" name="submit">Anmelden</button>
-                </form>
-                <?php 
-                if($loginError) {
-                    echo "<p class=\"alert alert-danger\"><strong>Username oder Passwort falsch</strong></p>";
-                } 
-                ?>
+                </form>                
             </div>
         </div>
     </div>
