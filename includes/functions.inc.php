@@ -4,12 +4,20 @@
 
 function desinfect($str) {
 	$str = trim($str); // removes whitespace
-	$str = filter_var($str, FILTER_SANITIZE_STRING); // desinfect strings, removes tags and remove or encode special characters from a string
-	$str = strip_tags($str); // removes HTML and PHP tags from a string
+	// $str = filter_var($str, FILTER_SANITIZE_STRING); // desinfect strings, removes tags and remove or encode special characters from a string
+	// $str = strip_tags($str); // removes HTML and PHP tags from a string
+	// *** WICHTIG ZUM LESEN: ****
+	// Habe obere filter_var und strip_tags auskommentiert, da es ansonsten bei den Textinhalten Zeichen wie z.B. ' bei Who's codiert oder HTML-Tags, welche bei der Formatierung mittels CKEditor angewendet werden, nicht übernimmt
 	$str = htmlspecialchars($str); // convert special characters to HTML entities
 	return $str;
 }
 
+// "decode" disinfection functions above, otherwise some html tags for example won't work for formatting with CKEditor
+function decodeStr($str) {
+	$str = html_entity_decode($str);
+	$str = htmlspecialchars_decode($str);
+	return $str;
+}
 
 /* === SESSION === */
 

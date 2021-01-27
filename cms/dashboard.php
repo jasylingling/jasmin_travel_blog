@@ -55,10 +55,62 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 
     <!-- Main Content -->
     <div class="container">
+
         <div class="row">
-            <div class="col-lg-8 col-md-10 mx-auto">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae blanditiis officia eligendi impedit dolorem distinctio rem dolorum nesciunt laboriosam id!
+            <!-- <p class="col-lg-12">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae blanditiis officia eligendi impedit dolorem distinctio rem dolorum nesciunt laboriosam id!</p> -->
+            
+            <div class="col-lg-4 offset-lg-2">
+                <a href="site-manager#blog">
+                    <div class="card border-info mb-5" style="max-width: 18rem;">
+                        <div class="card-header">Blog</div>
+                        <div class="card-body text-info">
+                            <h5 class="card-title">Info card title</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
+                </a>
             </div>
+
+            <div class="col-lg-4">
+                <a href="site-manager#about">
+                    <div class="card border-info mb-5" style="max-width: 18rem;">
+                        <div class="card-header">About</div>
+                        <div class="card-body text-info">
+                            <h5 class="card-title">Info card title</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+        </div>
+        <div class="row">
+            <!-- <p class="col-lg-12">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae blanditiis officia eligendi impedit dolorem distinctio rem dolorum nesciunt laboriosam id!</p> -->
+            
+            <div class="col-lg-4 offset-lg-2">
+                <a href="#">
+                    <div class="card border-info mb-3" style="max-width: 18rem;">
+                        <div class="card-header">Enter new user</div>
+                        <div class="card-body text-info">
+                            <h5 class="card-title">Info card title</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-4">
+                <a href="register">
+                    <div class="card border-info mb-3" style="max-width: 18rem;">
+                        <div class="card-header">Manage user</div>
+                        <div class="card-body text-info">
+                            <h5 class="card-title">Info card title</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
         </div>
     </div>
     <br>

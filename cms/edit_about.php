@@ -20,57 +20,40 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // print_r($_SESSION);
 // echo '</pre>';
 
-$articleID = $_GET['id'];
-// get selected blog article from database
-$query = "SELECT `country`, `title`, `subtitle`, `content_blogarticle` FROM `content_blog` WHERE `id`=?";
-$statement = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($statement, 'i', $articleID);
-mysqli_stmt_execute($statement);
-$result = mysqli_stmt_get_result($statement);
-// check if there is a match
-if(mysqli_num_rows($result) == 1){ 
+// get ABOUT content from database
+$query = "SELECT * FROM `content_about`";
+$result = mysqli_query($conn, $query);
+if(mysqli_num_rows($result) > 0){
     while($row = mysqli_fetch_assoc($result)) { 
-        $blogPosts [] = [
-            'country' => decodeStr($row['country']),
-            'title' => decodeStr($row['title']),
-            'subtitle' => decodeStr($row['subtitle']),
-            'content' => decodeStr($row['content_blogarticle'])
+        $aboutContent [] = [
+            'title_about' => decodeStr($row['title']),
+            'subtitle_about' => decodeStr($row['subtitle']),
+            'content_top' => decodeStr($row['content_top']),
+            'content_bottom' => decodeStr($row['content_bottom'])
         ];
     }
-    // echo '<pre>';
-    // print_r($blogPosts);
-    // echo '</pre>';
-    
 } else {
-    die("Beitrag kann nicht gefunden werden.");
+    die("About-Seite kann nicht gefunden werden.");
 }
 
 
-$validationErrorCountry = "";
 $validationErrorTitle = "";
 $validationErrorSubtitle = "";
-$validationErrorContent = "";
+$validationErrorContentTop = "";
+$validationErrorContentBottom = "";
 
 // check if save-button is clicked
 if(isset($_POST['save'])) {
-    $country = desinfect($_POST['country']); 
-    $title = desinfect($_POST['title']);
+    $title = desinfect($_POST['title']); 
     $subtitle = desinfect($_POST['subtitle']);
-    $content = desinfect($_POST['content']);
+    $content_top = desinfect($_POST['content_top']);
+    $content_bottom = desinfect($_POST['content_bottom']);
 
-    $countryValue = $country;
     $titleValue = $title;
     $subtitleValue = $subtitle;
-    $contentValue = $content;
-    // print_r($countryValue.$titleValue.$subtitleValue.$contentValue.$articleID);
-
-    // check if country field is empty
-    if(empty($country)) {
-        $validationErrorCountry = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
-    } else if (strlen($country) > 250) {
-        $validationErrorCountry = "<ul role=\"alert\"><li>Dieses Feld darf nicht mehr als 250 Zeichen enthalten.</li></ul>";
-    }
-    
+    $contentTopValue = $content_top;
+    $contentBottomValue = $content_bottom;
+        
     // check if title field is empty
     if(empty($title)) {
         $validationErrorTitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
@@ -85,18 +68,23 @@ if(isset($_POST['save'])) {
         $validationErrorSubtitle = "<ul role=\"alert\"><li>Dieses Feld darf nicht mehr als 250 Zeichen enthalten.</li></ul>";
     }
 
-    // check if content field is empty
-    if(empty($content)) {
-        $validationErrorContent = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    // check if content top field is empty
+    if(empty($content_top)) {
+        $validationErrorContentTop = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
+    }
+
+    // check if content bottom field is empty
+    if(empty($content_bottom)) {
+        $validationErrorContentBottom = "<ul role=\"alert\"><li>Dieses Feld darf nicht leer sein.</li></ul>";
     }
 
     // if no validation errors, update article in database
-    if(!$validationErrorCountry && !$validationErrorTitle && !$validationErrorSubtitle && !$validationErrorContent) {
+    if(!$validationErrorTitle && !$validationErrorSubtitle && !$validationErrorContentTop && !$validationErrorContentBottom) {
 
-        $queryUpdate = "UPDATE content_blog SET country=?, title=?, subtitle=?, content_blogarticle=? WHERE id=?";
+        $queryUpdate = "UPDATE content_about SET title=?, subtitle=?, content_top=?, content_bottom=?";
         
         $stmt = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmt, 'ssssi', $country, $title, $subtitle, $content, $articleID); // 'ssssi' = 4 strings and 1 integer: country, title, subtitle, content, id
+        mysqli_stmt_bind_param($stmt, 'ssss', $title, $subtitle, $content_top, $content_bottom);
         if(!mysqli_stmt_execute($stmt)) {
             echo mysqli_stmt_error($stmt);
         } else {
@@ -106,10 +94,10 @@ if(isset($_POST['save'])) {
     }
     
 } else {
-    $countryValue = "";
     $titleValue = "";
     $subtitleValue = "";
-    $contentValue = "";
+    $contentTopValue = "";
+    $contentBottomValue = "";
 
 }
 ?>
@@ -120,7 +108,7 @@ if(isset($_POST['save'])) {
 <head>
 
     <?php include("../includes/head.inc.html")?>
-    <title>CMS&nbsp;&ndash; Site Manager&nbsp;&ndash; Artikel bearbeiten | Jasmin's Travel Blog</title>
+    <title>CMS&nbsp;&ndash; Site Manager&nbsp;&ndash; Seite "About" bearbeiten | Jasmin's Travel Blog</title>
     <script src="../ckeditor/ckeditor.js"></script>
 
 </head>
@@ -138,7 +126,7 @@ if(isset($_POST['save'])) {
                 <div class="col-lg-9 col-md-10 mx-auto">
                     <div class="page-heading">
                         <h1>Site Manager</h1>
-                        <span class="subheading">Editiere den gewählten Blogartikel nach Belieben oder füge Bilder hinzu.</span>
+                        <span class="subheading">Ändere den Titel, den Untertitel oder den Text der Seite "About".</span>
                     </div>
                 </div>
             </div>
@@ -149,36 +137,35 @@ if(isset($_POST['save'])) {
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
-                <h2 class="text-center">Artikel bearbeiten</h2>
+                <h2 class="text-center">Seite "About" bearbeiten</h2>
                 <br>
-                <?php foreach ($blogPosts as $key => $value) { ?>
-                <form action="edit?id=<?=$articleID?>" method="post">
-                    <div class="control-group">
-                        <div class="form-group controls">
-                            <label for="country" class="floating-label-form-group label text-info border-0">Land<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control bg-light border" name="country" id="country" value="<?=$countryValue ? $countryValue : $value['country']?>">
-                            <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorCountry?></div>
-                        </div>
-                    </div>
+                <form action="edit_about" method="post">
                     <div class="control-group">
                         <div class="form-group controls">
                             <label for="title" class="floating-label-form-group label text-info border-0">Titel<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control bg-light border" name="title" id="title" value="<?=$titleValue ? $titleValue : $value['title']?>">
+                            <input type="text" class="form-control bg-light border" name="title" id="title" value="<?=$aboutContent[0]['title_about']?>">
                             <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorTitle?></div>
                         </div>
                     </div>
                     <div class="control-group">
                         <div class="form-group controls">
                             <label for="subtitle" class="floating-label-form-group label text-info border-0">Untertitel<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control bg-light border" name="subtitle" id="subtitle" value="<?=$subtitleValue ? $subtitleValue : $value['subtitle']?>">
+                            <input type="text" class="form-control bg-light border" name="subtitle" id="subtitle" value="<?=$aboutContent[0]['subtitle_about']?>">
                             <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorSubtitle?></div>
                         </div>
                     </div>
                     <div class="control-group">
                         <div class="form-group controls">
-                            <label for="content" class="floating-label-form-group label text-info border-0">Textinhalt<span class="text-danger">*</span></label>
-                            <textarea name="content" id="content" rows="10" cols="80"><?=$contentValue ? $contentValue : $value['content']?></textarea>
-                            <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorContent?></div>
+                            <label for="content_top" class="floating-label-form-group label text-info border-0">Oberer Textinhalt<span class="text-danger">*</span></label>
+                            <textarea name="content_top" id="content" rows="10" cols="80"><?=$aboutContent[0]['content_top']?></textarea>
+                            <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorContentTop?></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="content_bottom" class="floating-label-form-group label text-info border-0">Unterer Textinhalt<span class="text-danger">*</span></label>
+                            <textarea name="content_bottom" id="content" rows="10" cols="80"><?=$aboutContent[0]['content_bottom']?></textarea>
+                            <div class="help-block text-danger pt-2" style="font-size: 14px;""><?=$validationErrorContentBottom?></div>
                         </div>
                     </div>
                     <button type="save" class="btn btn-primary mr-1" name="save">Speichern</button>
@@ -205,7 +192,6 @@ if(isset($_POST['save'])) {
                         </div>
                     </div>               
                 </form>
-                <?php } ?>          
             </div>
         </div>
     </div>
@@ -228,11 +214,18 @@ if(isset($_POST['save'])) {
 
     <!-- Script for CKEditor -->
     <script>
-    CKEDITOR.replace('content', {
+    CKEDITOR.replace('content_top', {
         extraPlugins: 'editorplaceholder',
         editorplaceholder: 'Fange an etwas Grossartiges zu schreiben... :)',
         customConfig: 'MyConfig.js',
-        height: "350px"
+        height: "250px"
+    });
+
+    CKEDITOR.replace('content_bottom', {
+        extraPlugins: 'editorplaceholder',
+        editorplaceholder: 'Fange an etwas Grossartiges zu schreiben... :)',
+        customConfig: 'MyConfig.js',
+        height: "250px"
     });
     </script>
 

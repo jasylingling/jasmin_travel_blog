@@ -3,8 +3,8 @@ session_start();
 require_once('includes/config.inc.php');
 require_once('includes/functions.inc.php');
 
-// get all contents from database
-$query = "SELECT * FROM `contents`";
+// get all blog content from database
+$query = "SELECT * FROM `content_blog`";
 $result = mysqli_query($conn, $query);
 if(mysqli_num_rows($result) > 0){
     while($row = mysqli_fetch_assoc($result)) { 
@@ -123,12 +123,33 @@ if(mysqli_num_rows($result) > 0){
   </header>
 
   <!-- Main Content -->
-
-  <!-- VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
-        <?php foreach (array_reverse($blogPosts) as $key => $value) { ?>
+        <?php foreach (array_reverse($blogPosts) as $key => $value) { 
+          $desiredTitle =  $value['title'];
+          // Get images from the database
+          $query2 = "SELECT * FROM `images_blog` WHERE `blogarticle`=?";
+          $stmt = mysqli_prepare($conn, $query2);
+          mysqli_stmt_bind_param($stmt, 's', $desiredTitle);
+          mysqli_stmt_execute($stmt);
+          $result2 = mysqli_stmt_get_result($stmt);
+          // $result2 = mysqli_query($conn, $query2);
+          if(mysqli_num_rows($result2) > 0){
+            while($row = mysqli_fetch_assoc($result2)) { 
+              $blogImages [] = [
+                  'filename' => $row['img_filename'],
+                  'description' => $row['img_description'],
+                  'caption' => $row['img_caption'],
+                  'article' => $row['blogarticle'],
+                  'coverpic' => $row['coverpic']
+              ];
+            }
+            // echo '<pre>';s
+            // print_r($blogPosts);
+            // echo '</pre>';
+            $noImages = false;
+        }else { $noImages = true;} ?>
         <div class="post-preview">
           <a href="pages/blog#<?=$value['country']?>">
             <h2 class="post-title">
@@ -138,11 +159,17 @@ if(mysqli_num_rows($result) > 0){
               <?=$value['subtitle']?>
             </h3>
           </a>
-          <p class="post-meta">Gepostet von <?=$value['author']?> am <?=date("d.m.Y", strtotime($value['date']))?></p>
+          <p class="post-meta">gepostet von <?=$value['author']?> am <?=date("d.m.Y", strtotime($value['date']))?></p>
+          <?php 
+          if(!$noImages){
+          foreach ($blogImages as $key2 => $value2) {
+            if ($value['title'] == $value2['article'] && $value2['coverpic'] == "yes" ){
+              ?>
           <a href="pages/blog#<?=$value['country']?>">
-            <img class="img-fluid" src="img/ ***I M G _ F I L E N A M E***"
-              alt="***IMG_DESCRIPTION***">
+            <img class="img-fluid" src="img/<?=$value2['filename']?>"
+              alt="<?=$value2['caption']?>">
           </a>
+          <?php } }} else { echo "<img src=\"favicon/android-chrome-192x192.png\">";} ?> 
         </div>     
         <hr>
         <?php } ?> 
@@ -153,81 +180,6 @@ if(mysqli_num_rows($result) > 0){
       </div>
     </div>
   </div>
-  <!-- ENDE // VORBEREITUNG SQL DATENBANK STRUKTUR IN HTML -->
-
-
-  <!-- AKTUELLE HTML-STRUKTUR OHNE PHP/DATEN AUS SQL DATENBANK -->
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-        <div class="post-preview">
-          <a href="pages/blog#japan">
-            <h2 class="post-title">
-              JAPAN&nbsp;&ndash; Das Land der aufgehenden Sonne.
-            </h2>
-            <h3 class="post-subtitle">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi consequatur libero at ipsam fuga
-              repellendus.
-            </h3>
-          </a>
-          <p class="post-meta">Gepostet von
-            <a href="pages/about">Jasmin</a>
-            am 8. November 2020
-          </p>
-          <a href="pages/blog#japan">
-            <img class="img-fluid" src="img/japan_coverpic.jpg"
-              alt="a golden Buddhist temple in Kyoto, Japan called Kinkaku-ji (Golden Pavilion)">
-          </a>
-        </div>
-        <hr>
-        <div class="post-preview">
-          <a href="pages/blog#iceland">
-            <h2 class="post-title">
-              ISLAND&nbsp;&ndash; Kaltes Land, warmes Herz.
-            </h2>
-            <h3 class="post-subtitle">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus aliquam ex impedit error nam sunt
-              placeat. Autem qui consectetur veritatis.
-            </h3>
-          </a>
-          <p class="post-meta">Gepostet von
-            <a href="pages/about">Jasmin</a>
-            am 12. Oktober 2020
-          </p>
-          <a href="pages/blog#iceland">
-            <img class="img-fluid" src="img/iceland_coverpic.jpg"
-              alt="snowy landscape with hot spring in Grindavik, Iceland">
-          </a>
-        </div>
-        <hr>
-        <div class="post-preview">
-          <a href="pages/blog#mexico">
-            <h2 class="post-title">
-              MEXIKO&nbsp;&ndash; Fiestas, Farben und vieles mehr.
-            </h2>
-            <h3 class="post-subtitle">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi explicabo, at ratione voluptatibus illum
-              saepe facere fugiat illo.
-            </h3>
-          </a>
-          <p class="post-meta">Gepostet von
-            <a href="pages/about">Jasmin</a>
-            am 1. September 2020
-          </p>
-          <a href="pages/blog#mexico">
-            <img class="img-fluid" src="img/mexico_coverpic.jpg"
-              alt="me jumping in front of the mayan temple Chichen Itza in Yucatan, Mexico">
-          </a>
-        </div>
-        <hr>
-        <!-- Pager -->
-        <div class="clearfix">
-          <a class="btn btn-primary float-right" href="pages/blog#olderposts">Older Posts &rarr;</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <hr>
 
   <!-- Footer -->

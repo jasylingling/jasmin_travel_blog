@@ -25,6 +25,7 @@ $validationErrorCountry = "";
 $validationErrorTitle = "";
 $validationErrorSubtitle = "";
 $validationErrorContent = "";
+$validationErrorUpload = "";
 setlocale(LC_ALL, "de"); // set locale to "de" for "german" time zone
 
 // check if save-button is clicked
@@ -69,14 +70,84 @@ if(isset($_POST['save'])) {
 
     // if no validation errors, insert new article to database
     if(!$validationErrorCountry && !$validationErrorTitle && !$validationErrorSubtitle && !$validationErrorContent) {
-
-        $query = "INSERT INTO `contents` (`country`, `title`, `subtitle`, `content_blogarticle`, `author`, `post_date`) VALUES (?, ?, ?, ?, ?, ?)";
+        mysqli_begin_transaction($conn);
+        $query = "INSERT INTO `content_blog` (`country`, `title`, `subtitle`, `content_blogarticle`, `author`, `post_date`) VALUES (?, ?, ?, ?, ?, ?)";
         
         $statement = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($statement, 'ssssss', $country, $title, $subtitle, $content, $author, $currentDate); // 'ssssss' =  6 strings: country, title, subtitle, content, author (username), current date
         if(!mysqli_stmt_execute($statement)) {
             echo mysqli_stmt_error($statement);
         } else {
+            // if user uploading images, start image uploading process
+            mysqli_commit($conn);
+            // File upload configuration 
+            $targetDir = "../img/"; 
+            $allowTypes = array('jpg','png','jpeg','gif'); 
+            
+            $fileNames = array_filter($_FILES['files']['name']); 
+            if(!empty($fileNames)){ 
+                foreach($_FILES['files']['name'] as $key=>$val){ 
+                    // File upload path 
+                    if ($key == 0){
+                        $coverpic = "yes";
+                    } else {
+                        $coverpic = "no";
+                    }
+                    $fileName = $_FILES['files']['name'][$key];
+                    $tempLocation = $_FILES['files']["tmp_name"][$key];
+                    $targetFilePath = $targetDir . $fileName; 
+                    $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION)); 
+                    $uploadDate      = date('Y-m-d H:i:s');
+                    $uploadOk = 1;
+                    $insertValuesSQL = "";
+                    // Check whether file type is valid 
+                    if(in_array($fileType, $allowTypes)){ 
+                        // Upload file to server 
+                        if(move_uploaded_file($tempLocation, $targetFilePath)){ 
+                            // Image db insert sql 
+                            $imageDescription = "Dies ist eine Bildbeschreibung";
+                            $imageCaption = "Dies ist eine Bildunterschrift";
+                            $blogArticle = $title;
+                            $sqlVal = "('".$fileName."', '".$uploadDate."', '".$imageDescription."', '".$imageCaption."', '".$blogArticle."', '".$coverpic."')";
+                        }else{ 
+                            $response = array(
+                                "status" => "alert-danger",
+                                "message" => "File coud not be uploaded."
+                            );
+                        } 
+                    } else { 
+                        $response = array(
+                            "status" => "alert-danger",
+                            "message" => "Only .jpg, .jpeg and .png file formats allowed."
+                        );
+                    } 
+                    // Add into MySQL database
+                    if(!empty($fileName)) {
+                        
+                        var_dump($sqlVal);
+
+                        // get all blog content from database
+                        $query2 = "INSERT INTO images_blog (img_filename, uploaded_on, img_description, img_caption, blogarticle, coverpic) VALUES $sqlVal";
+                        $result2 = mysqli_query($conn, $query2);
+                        if($result2){
+                            $response = "";
+                        } else {
+                            print_r(mysqli_error($conn));
+                            $response = array(
+                                "status" => "alert-danger",
+                                "message" => "Files coudn't be uploaded due to database error."
+                            );
+                        }
+                    } 
+                }
+            } 
+            
+            // Display status message 
+            if(!empty($response)) {
+                $validationErrorUpload = $response["message"];  
+                    // echo $response["status"];
+                    // echo $response["message"];    
+            }
             header("Location: site-manager?created");
             die();
         }
@@ -89,8 +160,9 @@ if(isset($_POST['save'])) {
     $contentValue = "";
 }
 
-?>
 
+?>
+  
 <!DOCTYPE html>
 <html lang="en">
 
@@ -98,7 +170,7 @@ if(isset($_POST['save'])) {
 
     <?php include("../includes/head.inc.html")?>
     <title>CMS&nbsp;&ndash; Site Manager&nbsp;&ndash; Neuer Artikel | Jasmin's Travel Blog</title>
-    <!-- <script src="../ckeditor/ckeditor.js"></script> -->
+    <script src="../ckeditor/ckeditor.js"></script>
 
 </head>
 
@@ -127,45 +199,41 @@ if(isset($_POST['save'])) {
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
                 <h2 class="text-center">Neuer Artikel</h2>
-                <form action="create" method="post">
+                <br>
+                <form action="create" method="post" enctype="multipart/form-data">
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls">
-                            <label for="country">Land</label>
-                            <input type="text" class="form-control bg-light border" name="country" id="country"
-                                placeholder="Land" value="<?=$countryValue?>">
-                            <div class="help-block text-danger"><?=$validationErrorCountry?></div>
+                        <div class="form-group controls">
+                            <label for="country" class="floating-label-form-group label text-info border-0">Land<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light border" name="country" id="country" value="<?=$countryValue?>">
+                            <div class="help-block text-danger pt-2" style="font-size: 14px;"><?=$validationErrorCountry?></div>
                         </div>
                     </div>
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls">
-                            <label for="title">Titel</label>
-                            <input type="text" class="form-control bg-light border" name="title" id="title"
-                                placeholder="Titel" value="<?=$titleValue?>">
-                            <div class="help-block text-danger"><?=$validationErrorTitle?></div>
+                        <div class="form-group controls">
+                            <label for="title" class="floating-label-form-group label text-info border-0">Titel<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light border" name="title" id="title" value="<?=$titleValue?>">
+                            <div class="help-block text-danger pt-2"  style="font-size: 14px;"><?=$validationErrorTitle?></div>
                         </div>
                     </div>
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls">
-                            <label for="subtitle">Untertitel</label>
-                            <input type="subtitle" class="form-control bg-light border" name="subtitle" id="subtitle"
-                                placeholder="Untertitel" value="<?=$subtitleValue?>">
-                            <div class="help-block text-danger"><?=$validationErrorSubtitle?></div>
+                        <div class="form-group controls">
+                            <label for="subtitle" class="floating-label-form-group label text-info border-0">Untertitel<span class="text-danger">*</span></label>
+                            <input type="subtitle" class="form-control bg-light border" name="subtitle" id="subtitle" value="<?=$subtitleValue?>">
+                            <div class="help-block text-danger pt-2"  style="font-size: 14px;"><?=$validationErrorSubtitle?></div>
                         </div>
                     </div>                 
-                    <!-- <div class="control-group">
-                        <div class="form-group floating-label-form-group controls">
-                            <label for="message">Textinhalt</label>
-                            <textarea name="content" id="content" rows="10" cols="80">
-                            Bitte Textinhalt eingeben... CK EDITOR FORMAAAAAAAAAAT
-                            </textarea>
-                            <p class="help-block text-danger"></p>
-                        </div>
-                    </div>                 -->
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls">
-                            <label for="content">Textinhalt</label>
-                            <textarea class="form-control bg-light border" name="content" id="content" rows="10" cols="80" placeholder="Textinhalt"><?=$contentValue?></textarea>
-                            <div class="help-block text-danger"><?=$validationErrorContent?></div>
+                        <div class="form-group controls">
+                            <label for="content" class="floating-label-form-group label text-info border-0">Textinhalt<span class="text-danger">*</span></label>
+                            <textarea name="content" id="content" rows="10" cols="80"><?=$contentValue?></textarea>
+                            <div class="help-block text-danger pt-2"  style="font-size: 14px;"><?=$validationErrorContent?></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group controls">
+                            <label for="uploadImage" class="floating-label-form-group label text-info border-0">Bilder hochladen</label>
+                            <input type="file" class="form-control bg-light border" id="uploadImage" name="files[]" multiple value="<?="select files"?>">
+                            <div class="help-block text-danger pt-2"  style="font-size: 14px;"><?=$validationErrorUpload?></div>
                         </div>
                     </div>
                     <button type="save" class="btn btn-primary mr-1" name="save">Speichern</button>
@@ -213,12 +281,14 @@ if(isset($_POST['save'])) {
     <script src="../js/clean-blog.min.js"></script>
 
     <!-- Script for CKEditor -->
-    <!-- <script>
-        CKEDITOR.replace( 'content', {
+    <script>
+        CKEDITOR.replace('content', {
             extraPlugins: 'editorplaceholder',
-            editorplaceholder: 'Textinhalt'
-        } );
-    </script> -->
+            editorplaceholder: 'Fange an etwas Grossartiges zu schreiben... :)',
+            customConfig: 'MyConfig.js',
+            height: "350px"
+        });
+    </script>
 
 </body>
 

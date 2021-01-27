@@ -21,8 +21,8 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // echo '</pre>';
 
 
-// get all contents from database
-$query = "SELECT * FROM `contents`";
+// get all BLOG content from database
+$query = "SELECT * FROM `content_blog`";
 $result = mysqli_query($conn, $query);
 if(mysqli_num_rows($result) > 0){
     while($row = mysqli_fetch_assoc($result)) { 
@@ -40,12 +40,10 @@ if(mysqli_num_rows($result) > 0){
     die("No results.");
 }
 
-
-
 // if the "ultimate" delete-button in the modal is clicked, DELETE selected blog post
 if(isset($_POST['delete'])) {
     $cleanId = desinfect($_POST['delete']);
-    $sqldelete = "DELETE FROM `contents` WHERE `id`=?";        
+    $sqldelete = "DELETE FROM `content_blog` WHERE `id`=?";        
     $stmt = mysqli_prepare($conn, $sqldelete);
     mysqli_stmt_bind_param($stmt, 'i', $cleanId); // 'i' = 1 integer: id
     
@@ -56,6 +54,22 @@ if(isset($_POST['delete'])) {
         echo "error deleting the blog article";
     }
 } 
+
+// get ABOUT content from database
+$query2 = "SELECT * FROM `content_about`";
+$result2 = mysqli_query($conn, $query2);
+if(mysqli_num_rows($result2) > 0){
+    while($row2 = mysqli_fetch_assoc($result2)) { 
+        $aboutContent [] = [
+            'title_about' => $row2['title'],
+            'subtitle_about' => $row2['subtitle'],
+            'updated' => $row2['updated']
+        ];
+    
+    }    
+} else {
+    die("No results.");
+}
 ?>
 
 <!DOCTYPE html>
@@ -92,15 +106,15 @@ if(isset($_POST['delete'])) {
     <div class="container">
         <div class="row">
             <div class="col-lg-12 col-md-10 mx-auto">
-                <h2 class="text-center">Übersicht Blogartikel</h2>
+                <h2 class="text-center" id="blog">Übersicht Blogartikel</h2>
                 <br>
                 <a href="create" class="btn btn-primary"><i class="fas fa-plus"></i> Neuer Artikel</a>
                 <br>
                 <br>
                 <div class="table-responsive">
-                    <?= isset($_GET['updated']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich aktualisiert!</strong></div>" : ""?>                          
-                    <?= isset($_GET['created']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich erstellt!</strong></div>" : ""?>                          
-                    <?= isset($_GET['deleted']) ? "<div class=\"alert alert-danger\" role=\"alert\"><strong>Der Artikel wurde gelöscht!</strong></div>" : ""?>                          
+                    <?=isset($_GET['updated']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich aktualisiert!</strong></div>" : ""?>                          
+                    <?=isset($_GET['created']) ? "<div class=\"alert alert-success\" role=\"alert\"><strong>Der Artikel wurde erfolgreich erstellt!</strong></div>" : ""?>                          
+                    <?=isset($_GET['deleted']) ? "<div class=\"alert alert-danger\" role=\"alert\"><strong>Der Artikel wurde gelöscht!</strong></div>" : ""?>                          
                     <table class="table table-hover">
                         <thead class="thead-light">
                             <tr>
@@ -117,11 +131,11 @@ if(isset($_POST['delete'])) {
                                 <a href="edit?id=<?=$value['id']?>"><?=isset($_GET['created']) && $key == 0 ? $value['title']." <span class=\"badge bg-warning float-right p-2\">NEW!</span>" : $value['title']?></a>
                             </td>
                             <!-- change sql date format from YYYY-MM-DD to DD.MM.YYYY-->
-                            <td class="pr-3"><?=date("d.m.Y", strtotime($value['date']))?></td>
-                            <td><a class="btn btn-primary" href="edit?id=<?=$value['id']?>"><i class="fas fa-edit"></i> Bearbeiten</a></td>
+                            <td class="pr-4"><?=date("d.m.Y", strtotime($value['date']))?></td>
+                            <td><a class="btn btn-primary float-right" href="edit?id=<?=$value['id']?>"><i class="fas fa-edit"></i> Bearbeiten</a></td>
                             <td>
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deletePost-<?=$value['id']?>"><i class="fas fa-trash-alt mr-1"></i> Löschen</button>
+                                <button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deletePost-<?=$value['id']?>"><i class="fas fa-trash-alt mr-1"></i> Löschen</button>
                                 <!-- Modal -->
                                 <div class="modal fade" id="deletePost-<?=$value['id']?>" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -147,18 +161,36 @@ if(isset($_POST['delete'])) {
                         <?php } ?>
                         </tbody>
                     </table>
-
-                    <h2 class="text-center">Übersicht About</h2>
-                    <p class="text-center">would be greaaaaaaaat</p>
-
-                    <h2 class="text-center">Übersicht Contact</h2>
-                    <p class="text-center">would be greaaaaaaaat</p>
-
+                    <br>
+                    <br>
+                    <h2 class="text-center" id="about">Übersicht About</h2>
+                    <br>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Titel</th>
+                                <th scope="col">Untertitel</th>
+                                <th scope="col" colspan="2">zuletzt geändert am</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                <th scope="row"><i class="fab fa-keybase"></i></th>
+                                <td><a href="edit_about"><?=($aboutContent[0]['title_about'])?></a></td>
+                                <td><a href="edit_about"><?=($aboutContent[0]['subtitle_about'])?></a></td>
+                                <td><?=date("d.m.Y (h:i A)", strtotime($aboutContent[0]['updated']))?></td>
+                                <td><a class="btn btn-primary float-right" href="edit_about"><i class="fas fa-edit"></i> Bearbeiten</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
+    <br>
     <hr>
 
     <!-- Footer -->
