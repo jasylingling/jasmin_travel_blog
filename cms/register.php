@@ -20,6 +20,24 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
 // print_r($_SESSION);
 // echo '</pre>';
 
+// GET USERS
+$queryUsers = "SELECT * FROM `users`";
+$resultUsers = mysqli_query($conn, $queryUsers);
+if(mysqli_num_rows($resultUsers) > 0){
+    while($rowUsers = mysqli_fetch_assoc($resultUsers)) { 
+        $users [] = [
+            'user_username' => $rowUsers['username'],
+            'user_email' => $rowUsers['email']
+        ];
+    }
+    // echo '<pre>';
+    // print_r($blogPosts);
+    // echo '</pre>';
+    
+} else {
+    die("No results.");
+}
+
 
 /* === REGISTRATION FORM === */
 
@@ -198,6 +216,36 @@ if(isset($_POST['submit'])) {
                     </div>
                     <button type="submit" class="btn btn-primary" name="submit">Registrieren</button>
                 </form>
+            </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <div class="row">
+            <div class="col-lg-8 col-md-12 mx-auto">
+                <h2 class="text-center">Users</h2>
+                <br>
+                <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($users as $key => $value) { ?>
+                                <tr>
+                                    <th scope="row"><i class="fab fa-keybase"></i></th>
+                                    <td><a href="edit_about"><?=($value['user_username'])?></a></td>
+                                    <td><a href="edit_about"><?=($value['user_email'])?></a></td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

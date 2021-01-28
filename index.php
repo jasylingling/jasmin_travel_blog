@@ -128,14 +128,14 @@ if(mysqli_num_rows($result) > 0){
       <div class="col-lg-8 col-md-10 mx-auto">
         <?php foreach (array_reverse($blogPosts) as $key => $value) { 
           $desiredTitle =  $value['title'];
-          // Get images from the database
+          // get images from the database
           $query2 = "SELECT * FROM `images_blog` WHERE `blogarticle`=?";
           $stmt = mysqli_prepare($conn, $query2);
           mysqli_stmt_bind_param($stmt, 's', $desiredTitle);
           mysqli_stmt_execute($stmt);
           $result2 = mysqli_stmt_get_result($stmt);
           // $result2 = mysqli_query($conn, $query2);
-          if(mysqli_num_rows($result2) > 0){
+          if(mysqli_num_rows($result2) > 0) {
             while($row = mysqli_fetch_assoc($result2)) { 
               $blogImages [] = [
                   'filename' => $row['img_filename'],
@@ -149,7 +149,7 @@ if(mysqli_num_rows($result) > 0){
             // print_r($blogPosts);
             // echo '</pre>';
             $noImages = false;
-        }else { $noImages = true;} ?>
+          } else { $noImages = true; } ?>
         <div class="post-preview">
           <a href="pages/blog#<?=$value['country']?>">
             <h2 class="post-title">
@@ -163,13 +163,13 @@ if(mysqli_num_rows($result) > 0){
           <?php 
           if(!$noImages){
           foreach ($blogImages as $key2 => $value2) {
-            if ($value['title'] == $value2['article'] && $value2['coverpic'] == "yes" ){
-              ?>
+            if ($value['title'] == $value2['article'] && $value2['coverpic'] == "yes" ) {
+          ?>
           <a href="pages/blog#<?=$value['country']?>">
             <img class="img-fluid" src="img/<?=$value2['filename']?>"
               alt="<?=$value2['caption']?>">
           </a>
-          <?php } }} else { echo "<img src=\"favicon/android-chrome-192x192.png\">";} ?> 
+          <?php } } } else { echo "<img src=\"favicon/android-chrome-192x192.png\">"; } ?> 
         </div>     
         <hr>
         <?php } ?> 

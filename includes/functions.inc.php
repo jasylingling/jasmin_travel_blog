@@ -12,7 +12,7 @@ function desinfect($str) {
 	return $str;
 }
 
-// "decode" disinfection functions above, otherwise some html tags for example won't work for formatting with CKEditor
+// "decode" disinfection function above, otherwise some html tags for example won't work for formatting with CKEditor
 function decodeStr($str) {
 	$str = html_entity_decode($str);
 	$str = htmlspecialchars_decode($str);

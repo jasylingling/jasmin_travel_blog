@@ -80,14 +80,14 @@ if(isset($_POST['save'])) {
         } else {
             // if user uploading images, start image uploading process
             mysqli_commit($conn);
-            // File upload configuration 
+            // file upload configuration 
             $targetDir = "../img/"; 
             $allowTypes = array('jpg','png','jpeg','gif'); 
             
             $fileNames = array_filter($_FILES['files']['name']); 
-            if(!empty($fileNames)){ 
-                foreach($_FILES['files']['name'] as $key=>$val){ 
-                    // File upload path 
+            if(!empty($fileNames)) { 
+                foreach($_FILES['files']['name'] as $key => $val) { 
+                    // file upload path 
                     if ($key == 0){
                         $coverpic = "yes";
                     } else {
@@ -97,19 +97,19 @@ if(isset($_POST['save'])) {
                     $tempLocation = $_FILES['files']["tmp_name"][$key];
                     $targetFilePath = $targetDir . $fileName; 
                     $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION)); 
-                    $uploadDate      = date('Y-m-d H:i:s');
+                    $uploadDate = date('Y-m-d H:i:s');
                     $uploadOk = 1;
                     $insertValuesSQL = "";
-                    // Check whether file type is valid 
+                    // check whether file type is valid 
                     if(in_array($fileType, $allowTypes)){ 
-                        // Upload file to server 
+                        // upload file to server 
                         if(move_uploaded_file($tempLocation, $targetFilePath)){ 
-                            // Image db insert sql 
+                            // image db insert sql 
                             $imageDescription = "Dies ist eine Bildbeschreibung";
                             $imageCaption = "Dies ist eine Bildunterschrift";
                             $blogArticle = $title;
                             $sqlVal = "('".$fileName."', '".$uploadDate."', '".$imageDescription."', '".$imageCaption."', '".$blogArticle."', '".$coverpic."')";
-                        }else{ 
+                        } else { 
                             $response = array(
                                 "status" => "alert-danger",
                                 "message" => "File coud not be uploaded."
@@ -121,7 +121,7 @@ if(isset($_POST['save'])) {
                             "message" => "Only .jpg, .jpeg and .png file formats allowed."
                         );
                     } 
-                    // Add into MySQL database
+                    // add into database
                     if(!empty($fileName)) {
                         
                         var_dump($sqlVal);
@@ -142,7 +142,7 @@ if(isset($_POST['save'])) {
                 }
             } 
             
-            // Display status message 
+            // display status message 
             if(!empty($response)) {
                 $validationErrorUpload = $response["message"];  
                     // echo $response["status"];
@@ -285,7 +285,7 @@ if(isset($_POST['save'])) {
         CKEDITOR.replace('content', {
             extraPlugins: 'editorplaceholder',
             editorplaceholder: 'Fange an etwas Grossartiges zu schreiben... :)',
-            customConfig: 'MyConfig.js',
+            customConfig: 'config.js',
             height: "350px"
         });
     </script>

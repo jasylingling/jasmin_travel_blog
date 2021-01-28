@@ -68,12 +68,9 @@ if(mysqli_num_rows($result) > 0){
           <h2 id="<?=$value['country']?>"><?=$value['title']?></h2>
           <span class="meta"><em>gepostet von <?=$value['author']?> am <?=date("d.m.Y", strtotime($value['date']))?></em></span>
           <p><?=$value['content']?></p>
-
-           
           <?php
           $desiredTitle =  $value['title'];
           // Get images from the database
-          
           $query2 = "SELECT * FROM `images_blog` WHERE `blogarticle`=?";
           $stmt = mysqli_prepare($conn, $query2);
           mysqli_stmt_bind_param($stmt, 's', $desiredTitle);

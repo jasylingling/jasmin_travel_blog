@@ -231,7 +231,7 @@ if(isset($_POST['save'])) {
     CKEDITOR.replace('content', {
         extraPlugins: 'editorplaceholder',
         editorplaceholder: 'Fange an etwas Grossartiges zu schreiben... :)',
-        customConfig: 'MyConfig.js',
+        customConfig: 'config.js',
         height: "350px"
     });
     </script>
