@@ -223,7 +223,7 @@ if(isset($_POST['submit'])) {
             <br>
             <div class="row">
             <div class="col-lg-8 col-md-12 mx-auto">
-                <h2 class="text-center">Users</h2>
+                <h2 class="text-center" id="users_anchor">Users</h2>
                 <br>
                 <div class="table-responsive">
                         <table class="table table-hover">

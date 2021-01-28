@@ -88,7 +88,7 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
             <!-- <p class="col-lg-12">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae blanditiis officia eligendi impedit dolorem distinctio rem dolorum nesciunt laboriosam id!</p> -->
             
             <div class="col-lg-4 offset-lg-2">
-                <a href="#">
+                <a href="register">
                     <div class="card border-info mb-3" style="max-width: 18rem;">
                         <div class="card-header">Enter new user</div>
                         <div class="card-body text-info">
@@ -100,7 +100,7 @@ $_SESSION['timestamp'] = time(); // every user activity (script call) refreshes 
             </div>
 
             <div class="col-lg-4">
-                <a href="register">
+                <a href="register#users_anchor">
                     <div class="card border-info mb-3" style="max-width: 18rem;">
                         <div class="card-header">Manage user</div>
                         <div class="card-body text-info">
